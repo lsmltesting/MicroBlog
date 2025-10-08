@@ -6,8 +6,8 @@ import (
 )
 
 type ErrorDTO struct {
-	Message string    `json: "message"`
-	Time    time.Time `json: "time"`
+	Message string    `json:"message"`
+	Time    time.Time `json:"time"`
 }
 
 func (e ErrorDTO) ToString() string {
