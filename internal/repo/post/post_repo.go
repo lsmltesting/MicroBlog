@@ -1,78 +1,115 @@
 package post
 
 import (
-	"sync"
+	"context"
 
+	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5/pgxpool"
 	customErrors "github.com/lsmltesting/MicroBlog/internal/errors"
 	"github.com/lsmltesting/MicroBlog/internal/models"
 )
 
 type PostRepository interface {
-	Save(post *models.Post) (int, error)
-	FindPostByID(postID int) (*models.Post, error)
-	GetAllPosts() (map[int]*models.Post, error)
-	UpdateLikeHistory(postID int, likeID int) error
+	Save(ctx context.Context, post *models.Post) (int, error)
+	FindPostByID(ctx context.Context, postID int) (*models.Post, error)
+	GetAllPosts(ctx context.Context) (map[int]*models.Post, error)
 }
 
 type inMemoryPostRepo struct {
-	mtx    sync.RWMutex
-	data   map[int]*models.Post
-	lastID int
+	pool *pgxpool.Pool
+	psql squirrel.StatementBuilderType
 }
 
-func NewInMemoryPostRepo() PostRepository {
+func NewInMemoryPostRepo(pool *pgxpool.Pool) PostRepository {
 	return &inMemoryPostRepo{
-		data: make(map[int]*models.Post),
+		pool: pool,
+		psql: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 }
 
-func (r *inMemoryPostRepo) Save(post *models.Post) (int, error) {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
+func (r *inMemoryPostRepo) Save(ctx context.Context, post *models.Post) (int, error) {
+	querySave, args, err := r.psql.
+		Insert("posts").
+		Columns("created_at", "udpate_at", "text", "user_id").
+		Values(post.CreatedAt, post.UpdatedAt, post.Text, post.UserID).
+		Suffix("returning id").
+		ToSql()
 
-	r.lastID++
+	if err != nil {
+		return 0, customErrors.ErrFailedBuildQueryForPSQL
+	}
 
-	post.ID = r.lastID
-	r.data[r.lastID] = post
+	var id int
+	if err := r.pool.QueryRow(ctx, querySave, args...).Scan(&id); err != nil {
+		return 0, customErrors.ErrFailedCreatePostInPSQL
+	}
 
-	return r.lastID, nil
+	return id, nil
 }
 
-func (r *inMemoryPostRepo) FindPostByID(postID int) (*models.Post, error) {
-	r.mtx.RLock()
-	defer r.mtx.RUnlock()
+func (r *inMemoryPostRepo) FindPostByID(ctx context.Context, postID int) (*models.Post, error) {
+	queryFind, args, err := r.psql.
+		Select("created_at", "udpate_at", "text", "user_id", "id").
+		From("posts").
+		Where(squirrel.Eq{"id": postID}).
+		ToSql()
 
-	post, ok := r.data[postID]
-	if !ok {
-		return nil, customErrors.ErrEmptyPostText
+	if err != nil {
+		return nil, customErrors.ErrFailedBuildQueryForPSQL
 	}
+
+	post := &models.Post{}
+	err = r.pool.QueryRow(ctx, queryFind, args...).Scan(
+		&post.CreatedAt,
+		&post.UpdatedAt,
+		&post.Text,
+		&post.UserID,
+		&post.ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return post, nil
 }
 
-func (r *inMemoryPostRepo) GetAllPosts() (map[int]*models.Post, error) {
-	r.mtx.RLock()
-	defer r.mtx.RUnlock()
+func (r *inMemoryPostRepo) GetAllPosts(ctx context.Context) (map[int]*models.Post, error) {
+	queryAll, args, err := r.psql.
+		Select("created_at", "updated_at", "text", "user_id", "id").
+		From("posts").
+		ToSql()
 
-	if len(r.data) == 0 {
-		return nil, customErrors.ErrNotAnyPostExists
-	}
-	return r.data, nil
-}
-
-func (r *inMemoryPostRepo) UpdateLikeHistory(postID int, likeID int) error {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
-	_, ok := r.data[postID]
-	if !ok {
-		return customErrors.ErrNotFindPost
+	if err != nil {
+		return nil, customErrors.ErrFailedBuildQueryForPSQL
 	}
 
-	if r.data[postID].HistoryLikes == nil {
-		r.data[postID].HistoryLikes = make(map[int]struct{})
+	rows, err := r.pool.Query(ctx, queryAll, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	posts := make(map[int]*models.Post)
+	for rows.Next() {
+		post := &models.Post{}
+
+		err = rows.Scan(
+			&post.CreatedAt,
+			&post.UpdatedAt,
+			&post.Text,
+			&post.UserID,
+			&post.ID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		posts[post.ID] = post
 	}
 
-	r.data[postID].HistoryLikes[likeID] = struct{}{}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
-	return nil
+	return posts, nil
 }

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/lsmltesting/MicroBlog/internal/logger"
@@ -19,7 +20,7 @@ func NewUserServiceDecorator(userService UserService, lg logger.Logger) UserServ
 	}
 }
 
-func (u *userServiceDecorator) CreateUser(username string, email string, password string) (int, error) {
+func (u *userServiceDecorator) CreateUser(ctx context.Context, username string, email string, password string) (int, error) {
 	u.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -31,7 +32,7 @@ func (u *userServiceDecorator) CreateUser(username string, email string, passwor
 		"CreateUser from like service is called",
 	)
 
-	userID, err := u.userService.CreateUser(username, email, password)
+	userID, err := u.userService.CreateUser(ctx, username, email, password)
 
 	if err != nil {
 		u.lg.AddLog(
@@ -59,7 +60,7 @@ func (u *userServiceDecorator) CreateUser(username string, email string, passwor
 
 	return userID, err
 }
-func (u *userServiceDecorator) GetUserByID(ID int) (*models.User, error) {
+func (u *userServiceDecorator) GetUserByID(ctx context.Context, ID int) (*models.User, error) {
 	u.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -69,7 +70,7 @@ func (u *userServiceDecorator) GetUserByID(ID int) (*models.User, error) {
 		"GetUserByID from like service is called",
 	)
 
-	userModel, err := u.userService.GetUserByID(ID)
+	userModel, err := u.userService.GetUserByID(ctx, ID)
 
 	if err != nil {
 		u.lg.AddLog(
@@ -93,40 +94,41 @@ func (u *userServiceDecorator) GetUserByID(ID int) (*models.User, error) {
 
 	return userModel, err
 }
-func (u *userServiceDecorator) UpdatePostHistory(userID int, postID int) error {
-	u.lg.AddLog(
-		logger.LevelInfo,
-		logger.SourceService,
-		map[string]string{
-			"userID": strconv.Itoa(userID),
-			"postID": strconv.Itoa(postID),
-		},
-		"UpdatePostHistory from like service is called",
-	)
 
-	err := u.userService.UpdatePostHistory(userID, postID)
+// func (u *userServiceDecorator) UpdatePostHistory(userID int, postID int) error {
+// 	u.lg.AddLog(
+// 		logger.LevelInfo,
+// 		logger.SourceService,
+// 		map[string]string{
+// 			"userID": strconv.Itoa(userID),
+// 			"postID": strconv.Itoa(postID),
+// 		},
+// 		"UpdatePostHistory from like service is called",
+// 	)
 
-	if err != nil {
-		u.lg.AddLog(
-			logger.LevelError,
-			logger.SourceService,
-			map[string]string{
-				"userID": strconv.Itoa(userID),
-				"postID": strconv.Itoa(postID),
-			},
-			err.Error(),
-		)
-	} else {
-		u.lg.AddLog(
-			logger.LevelInfo,
-			logger.SourceService,
-			map[string]string{
-				"userID": strconv.Itoa(userID),
-				"postID": strconv.Itoa(postID),
-			},
-			"UpdatePostHistory called successfully",
-		)
-	}
+// 	err := u.userService.UpdatePostHistory(userID, postID)
 
-	return err
-}
+// 	if err != nil {
+// 		u.lg.AddLog(
+// 			logger.LevelError,
+// 			logger.SourceService,
+// 			map[string]string{
+// 				"userID": strconv.Itoa(userID),
+// 				"postID": strconv.Itoa(postID),
+// 			},
+// 			err.Error(),
+// 		)
+// 	} else {
+// 		u.lg.AddLog(
+// 			logger.LevelInfo,
+// 			logger.SourceService,
+// 			map[string]string{
+// 				"userID": strconv.Itoa(userID),
+// 				"postID": strconv.Itoa(postID),
+// 			},
+// 			"UpdatePostHistory called successfully",
+// 		)
+// 	}
+
+// 	return err
+// }

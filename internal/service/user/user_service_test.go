@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"testing"
 
 	"github.com/lsmltesting/MicroBlog/internal/models"
@@ -12,32 +13,33 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) Save(user *models.User) (int, error) {
-	args := m.Called(user)
+func (m *MockUserRepository) Save(ctx context.Context, user *models.User) (int, error) {
+	args := m.Called(ctx, user)
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockUserRepository) FindUserByID(ID int) (*models.User, error) {
-	args := m.Called(ID)
+func (m *MockUserRepository) FindUserByID(ctx context.Context, ID int) (*models.User, error) {
+	args := m.Called(ctx, ID)
 	return args.Get(0).(*models.User), args.Error(1)
 }
 
-func (m *MockUserRepository) UpdatePostHistory(userID int, postID int) error {
-	args := m.Called(userID, postID)
-	return args.Error(0)
-}
+// func (m *MockUserRepository) UpdatePostHistory(userID int, postID int) error {
+// 	args := m.Called(userID, postID)
+// 	return args.Error(0)
+// }
 
 func TestUserService_CreateUser_Success(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	service := NewUserService(mockRepo)
+	ctx := context.Background()
 
 	testID := 42
 	// Set up mock for Save()
-	mockRepo.On("Save", mock.MatchedBy(func(user *models.User) bool {
+	mockRepo.On("Save", ctx, mock.MatchedBy(func(user *models.User) bool {
 		return user.Username == "testingUser" && user.Email == "test@gmail.com"
 	})).Return(testID, nil)
 
-	userId, err := service.CreateUser("testingUser", "test@gmail.com", "sdfmdsfmsdkfm123")
+	userId, err := service.CreateUser(ctx, "testingUser", "test@gmail.com", "sdfmdsfmsdkfm123")
 
 	assert.NoError(t, err)
 	assert.Equal(t, testID, userId)
@@ -50,11 +52,12 @@ func TestUserService_CreateUser_Success(t *testing.T) {
 func TestUserService_CreateUser_Error(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	service := NewUserService(mockRepo)
+	ctx := context.Background()
 
 	//Set up mock for Save() that Save() return error
-	mockRepo.On("Save", mock.Anything).Return(0, assert.AnError)
+	mockRepo.On("Save", ctx, mock.Anything).Return(0, assert.AnError)
 
-	userId, err := service.CreateUser("testgingUser", "test@gmail.com", "password123")
+	userId, err := service.CreateUser(ctx, "testgingUser", "test@gmail.com", "password123")
 
 	assert.Error(t, err)
 	assert.Equal(t, 0, userId)
@@ -65,6 +68,7 @@ func TestUserService_CreateUser_Error(t *testing.T) {
 func TestUserService_GetUserByID_Success(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	service := NewUserService(mockRepo)
+	ctx := context.Background()
 
 	userID := 33
 
@@ -76,9 +80,9 @@ func TestUserService_GetUserByID_Success(t *testing.T) {
 	}
 
 	//Set up mock for FindUserByID()
-	mockRepo.On("FindUserByID", userID).Return(expectedUser, nil)
+	mockRepo.On("FindUserByID", ctx, userID).Return(expectedUser, nil)
 
-	user, err := service.GetUserByID(userID)
+	user, err := service.GetUserByID(ctx, userID)
 
 	assert.NoError(t, err)
 	assert.Equal(t, user, expectedUser)
@@ -89,12 +93,13 @@ func TestUserService_GetUserByID_Success(t *testing.T) {
 func TestUserService_GetUserByID_NotFound(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	service := NewUserService(mockRepo)
+	ctx := context.Background()
 
 	userID := 1231
 
-	mockRepo.On("FindUserByID", mock.Anything).Return((*models.User)(nil), assert.AnError)
+	mockRepo.On("FindUserByID", ctx, mock.Anything).Return((*models.User)(nil), assert.AnError)
 
-	user, err := service.GetUserByID(userID)
+	user, err := service.GetUserByID(ctx, userID)
 
 	assert.Error(t, err)
 	assert.Nil(t, user)

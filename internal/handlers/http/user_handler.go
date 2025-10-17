@@ -30,19 +30,20 @@ func (h *UserHTTPHandler) sendError(w http.ResponseWriter, message string, statu
 
 func (h *UserHTTPHandler) UserHandlerRegister(w http.ResponseWriter, r *http.Request) {
 	var userDTO dto.UserDTO
+	ctx := r.Context()
 
 	if err := json.NewDecoder(r.Body).Decode(&userDTO); err != nil {
 		h.sendError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	userID, err := h.UserService.CreateUser(userDTO.Username, userDTO.Email, userDTO.Password)
+	userID, err := h.UserService.CreateUser(ctx, userDTO.Username, userDTO.Email, userDTO.Password)
 	if err != nil {
 		h.sendError(w, err.Error(), http.StatusConflict)
 		return
 	}
 
-	user, err := h.UserService.GetUserByID(userID)
+	user, err := h.UserService.GetUserByID(ctx, userID)
 	if err != nil {
 		h.sendError(w, err.Error(), http.StatusBadRequest)
 		return

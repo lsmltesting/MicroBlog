@@ -1,16 +1,17 @@
 package post
 
 import (
+	"context"
+
 	"github.com/lsmltesting/MicroBlog/internal/models"
 	"github.com/lsmltesting/MicroBlog/internal/repo/post"
 	"github.com/lsmltesting/MicroBlog/internal/service/user"
 )
 
 type PostService interface {
-	CreatePost(user int, text string) (int, error)
-	GetPostByID(postID int) (*models.Post, error)
-	GetAllPosts() (map[int]*models.Post, error)
-	UpdateLikeHistory(postID int, likeID int) error
+	CreatePost(ctx context.Context, user int, text string) (int, error)
+	GetPostByID(ctx context.Context, postID int) (*models.Post, error)
+	GetAllPosts(ctx context.Context) (map[int]*models.Post, error)
 }
 
 type postService struct {
@@ -25,9 +26,9 @@ func NewPostService(repo post.PostRepository, userService user.UserService) Post
 	}
 }
 
-func (s *postService) CreatePost(userID int, text string) (int, error) {
+func (s *postService) CreatePost(ctx context.Context, userID int, text string) (int, error) {
 	// Check if user with shared userId is exists
-	_, err := s.userService.GetUserByID(userID)
+	_, err := s.userService.GetUserByID(ctx, userID)
 	if err != nil {
 		return 0, err
 	}
@@ -38,25 +39,18 @@ func (s *postService) CreatePost(userID int, text string) (int, error) {
 	}
 
 	// After creating post update user's posthistory map
-	postID, err := s.repo.Save(post)
+	postID, err := s.repo.Save(ctx, post)
 	if err != nil {
 		return 0, err
 	}
-	err = s.userService.UpdatePostHistory(userID, postID)
-	if err != nil {
-		return 0, err
-	}
+
 	return postID, nil
 }
 
-func (s *postService) GetPostByID(postID int) (*models.Post, error) {
-	return s.repo.FindPostByID(postID)
+func (s *postService) GetPostByID(ctx context.Context, postID int) (*models.Post, error) {
+	return s.repo.FindPostByID(ctx, postID)
 }
 
-func (s *postService) GetAllPosts() (map[int]*models.Post, error) {
-	return s.repo.GetAllPosts()
-}
-
-func (s *postService) UpdateLikeHistory(postID int, likeID int) error {
-	return s.repo.UpdateLikeHistory(postID, likeID)
+func (s *postService) GetAllPosts(ctx context.Context) (map[int]*models.Post, error) {
+	return s.repo.GetAllPosts(ctx)
 }

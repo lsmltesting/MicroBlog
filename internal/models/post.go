@@ -7,12 +7,11 @@ import (
 )
 
 type Post struct {
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	Text         string
-	UserID       int
-	HistoryLikes map[int]struct{} // key = LikeID
-	ID           int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Text      string
+	UserID    int
+	ID        int
 }
 
 func NewPost(userID int, text string) (*Post, error) {

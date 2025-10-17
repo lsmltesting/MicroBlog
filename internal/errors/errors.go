@@ -19,4 +19,8 @@ var (
 	ErrQueueClosed = errors.New("queue is closed")
 
 	ErrLoggerChanClosed = errors.New("channel message of logs is closed")
+
+	ErrFailedBuildQueryForPSQL = errors.New("build insert query is failed")
+	ErrFailedCreateUserInPSQL  = errors.New("create new user is failed")
+	ErrFailedCreatePostInPSQL  = errors.New("create new post is failed")
 )

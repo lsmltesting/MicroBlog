@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/lsmltesting/MicroBlog/db"
 	handlers "github.com/lsmltesting/MicroBlog/internal/handlers/http"
 	"github.com/lsmltesting/MicroBlog/internal/logger"
 	"github.com/lsmltesting/MicroBlog/internal/queue"
@@ -21,21 +22,32 @@ import (
 )
 
 func main() {
-	userRepo := userRepo.NewInMemoryUserRepo()
-	baseUserService := userService.NewUserService(userRepo)
-
-	postRepo := postRepo.NewInMemoryPostRepo()
-	basePostService := postService.NewPostService(postRepo, baseUserService)
-
-	likeRepo := likeRepo.NewInMemoryLikeRepo()
-	baseLikeService := likeService.NewLikeService(likeRepo, baseUserService, basePostService)
-
 	lg := logger.NewLogger(
 		logger.LoggerConfig{
 			BufferSize: 100,
 			Workers:    6,
 		},
 	)
+
+	pool, err := db.NewPostgresPool(lg)
+	if err != nil {
+		lg.AddLog(
+			logger.LevelError,
+			logger.SourceMain,
+			make(map[string]string),
+			fmt.Sprintf("Catch pool error - %v", err),
+		)
+	}
+	defer pool.Close()
+
+	userRepo := userRepo.NewInMemoryUserRepo(pool)
+	baseUserService := userService.NewUserService(userRepo)
+
+	postRepo := postRepo.NewInMemoryPostRepo(pool)
+	basePostService := postService.NewPostService(postRepo, baseUserService)
+
+	likeRepo := likeRepo.NewInMemoryLikeRepo()
+	baseLikeService := likeService.NewLikeService(likeRepo, baseUserService, basePostService)
 
 	userServiceDecorator := userService.NewUserServiceDecorator(baseUserService, lg)
 	postServiceDecorator := postService.NewPostServiceDecorator(basePostService, lg)
@@ -46,7 +58,6 @@ func main() {
 			BufferSize: 100,
 			Workers:    6,
 		},
-		// baseLikeService,
 		likeServiceDecorator,
 	)
 
