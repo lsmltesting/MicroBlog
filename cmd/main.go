@@ -29,6 +29,10 @@ func main() {
 		},
 	)
 
+	rootCtx := context.Background()
+	ctx, stop := signal.NotifyContext(rootCtx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	pool, err := db.NewPostgresPool(lg)
 	if err != nil {
 		lg.AddLog(
@@ -46,7 +50,7 @@ func main() {
 	postRepo := postRepo.NewInMemoryPostRepo(pool)
 	basePostService := postService.NewPostService(postRepo, baseUserService)
 
-	likeRepo := likeRepo.NewInMemoryLikeRepo()
+	likeRepo := likeRepo.NewInMemoryLikeRepo(pool)
 	baseLikeService := likeService.NewLikeService(likeRepo, baseUserService, basePostService)
 
 	userServiceDecorator := userService.NewUserServiceDecorator(baseUserService, lg)
@@ -54,6 +58,7 @@ func main() {
 	likeServiceDecorator := likeService.NewLikeServiceDecorator(baseLikeService, lg)
 
 	likeQueue := queue.NewLikeQueue(
+		ctx,
 		queue.LikeQueueConfig{
 			BufferSize: 100,
 			Workers:    6,
@@ -81,13 +86,6 @@ func main() {
 		postHttpHandler,
 		likeHttpHandler,
 	)
-
-	ctx, stop := signal.NotifyContext(
-		context.Background(),
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
-	defer stop()
 
 	// starting server in goroutine
 	serverErr := make(chan error, 1)

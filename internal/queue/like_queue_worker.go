@@ -1,16 +1,17 @@
 package queue
 
 import (
+	"context"
 	"log"
 )
 
-func (l *likeQueueImplement) startWorkers() {
+func (l *likeQueueImplement) startWorkers(ctx context.Context) {
 	for i := 0; i < l.workers; i++ {
-		go l.worker(i)
+		go l.worker(ctx, i)
 	}
 }
 
-func (l *likeQueueImplement) worker(workerID int) {
+func (l *likeQueueImplement) worker(ctx context.Context, workerID int) {
 	log.Println("Starting handle queue with workerID:", workerID)
 	for {
 		select {
@@ -20,17 +21,22 @@ func (l *likeQueueImplement) worker(workerID int) {
 				return
 			}
 
-			l.handleQueue(likeForChan)
+			l.handleQueue(ctx, likeForChan)
 
 		case <-l.stop:
 			log.Printf("Catch stop signal with worker: %d", workerID)
 			return
+
+		case <-ctx.Done():
+			log.Printf("Context done for worker: %d, stopping", workerID)
+
 		}
+
 	}
 }
 
-func (l *likeQueueImplement) handleQueue(likeForChan LikeForChan) (int, error) {
-	likeID, err := l.likeService.CreateLike(likeForChan.UserID, likeForChan.PostID)
+func (l *likeQueueImplement) handleQueue(ctx context.Context, likeForChan LikeForChan) (int, error) {
+	likeID, err := l.likeService.CreateLike(ctx, likeForChan.UserID, likeForChan.PostID)
 	if err != nil {
 		return 0, err
 	}

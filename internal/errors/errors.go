@@ -23,4 +23,5 @@ var (
 	ErrFailedBuildQueryForPSQL = errors.New("build insert query is failed")
 	ErrFailedCreateUserInPSQL  = errors.New("create new user is failed")
 	ErrFailedCreatePostInPSQL  = errors.New("create new post is failed")
+	ErrFailedCreateLikeInPSQL  = errors.New("create new like is failed")
 )
