@@ -30,7 +30,7 @@ func NewInMemoryPostRepo(pool *pgxpool.Pool) PostRepository {
 func (r *inMemoryPostRepo) Save(ctx context.Context, post *models.Post) (int, error) {
 	querySave, args, err := r.psql.
 		Insert("posts").
-		Columns("created_at", "udpate_at", "text", "user_id").
+		Columns("created_at", "updated_at", "text", "user_id").
 		Values(post.CreatedAt, post.UpdatedAt, post.Text, post.UserID).
 		Suffix("returning id").
 		ToSql()
@@ -49,7 +49,7 @@ func (r *inMemoryPostRepo) Save(ctx context.Context, post *models.Post) (int, er
 
 func (r *inMemoryPostRepo) FindPostByID(ctx context.Context, postID int) (*models.Post, error) {
 	queryFind, args, err := r.psql.
-		Select("created_at", "udpate_at", "text", "user_id", "id").
+		Select("created_at", "updated_at", "text", "user_id", "id").
 		From("posts").
 		Where(squirrel.Eq{"id": postID}).
 		ToSql()

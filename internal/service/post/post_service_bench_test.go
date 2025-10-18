@@ -38,7 +38,14 @@ func BenchmarkCreatePost(b *testing.B) {
 	)
 
 	ctx := context.Background()
-	pool, _ := db.NewPostgresPool(lg)
+
+	pool, err := db.NewPostgresPool(lg)
+	if err != nil {
+		b.Fatalf("NewPostgresPool failed: %v", err)
+	}
+
+	defer pool.Close()
+
 	postRepo := post.NewInMemoryPostRepo(pool)
 	mockUserService := &mockUserService{}
 
@@ -59,7 +66,14 @@ func BenchmarkGetPostByID(b *testing.B) {
 	)
 
 	ctx := context.Background()
-	pool, _ := db.NewPostgresPool(lg)
+
+	pool, err := db.NewPostgresPool(lg)
+	if err != nil {
+		b.Fatalf("NewPostgresPool failed: %v", err)
+	}
+
+	defer pool.Close()
+
 	postRepo := post.NewInMemoryPostRepo(pool)
 	mockUserService := &mockUserService{}
 
@@ -87,7 +101,14 @@ func BenchmarkGetAllPosts(b *testing.B) {
 	)
 
 	ctx := context.Background()
-	pool, _ := db.NewPostgresPool(lg)
+
+	pool, err := db.NewPostgresPool(lg)
+	if err != nil {
+		b.Fatalf("NewPostgresPool failed: %v", err)
+	}
+
+	defer pool.Close()
+
 	postRepo := post.NewInMemoryPostRepo(pool)
 	mockUserService := &mockUserService{}
 

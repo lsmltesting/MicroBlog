@@ -48,7 +48,7 @@ func (r *inMemoryUserRepo) Save(ctx context.Context, user *models.User) (int, er
 func (r *inMemoryUserRepo) FindUserByID(ctx context.Context, ID int) (*models.User, error) {
 
 	queryFindUser, args, err := r.psql.
-		Select("id", "username", "email", "password", "created_at").
+		Select("id", "username", "email", "password").
 		From("users").
 		Where(squirrel.Eq{"id": ID}).
 		ToSql()
@@ -56,7 +56,12 @@ func (r *inMemoryUserRepo) FindUserByID(ctx context.Context, ID int) (*models.Us
 		return nil, customErrors.ErrFailedBuildQueryForPSQL
 	}
 	user := &models.User{}
-	if err := r.pool.QueryRow(ctx, queryFindUser, args...).Scan(user); err != nil {
+	if err := r.pool.QueryRow(ctx, queryFindUser, args...).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+	); err != nil {
 		return nil, err
 	}
 

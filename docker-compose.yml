@@ -47,7 +47,26 @@ services:
         /go/bin/goose -dir /migrations postgres "postgres://$DB_USER:$DB_PASSWORD@db:$DB_PORT/$DB_NAME?sslmode=disable" up
       "
     restart: "no"
-    
+
+  dev:
+    image: golang:1.23.2-alpine
+    platform: linux/amd64
+    container_name: microblog_dev
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+
 volumes:
   postgres_data:
       name: microblog_postgres_data

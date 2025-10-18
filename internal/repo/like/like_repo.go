@@ -30,7 +30,7 @@ func NewInMemoryLikeRepo(pool *pgxpool.Pool) LikeRepository {
 func (l *inMemoryLikeRepo) Save(ctx context.Context, like *models.Like) (int, error) {
 	querySave, args, err := l.psql.
 		Insert("likes").
-		Columns("created_at", "post_id", "like_id").
+		Columns("created_at", "post_id", "user_id").
 		Values(like.CreatedAt, like.PostID, like.UserID).
 		Suffix("returning id").
 		ToSql()
@@ -49,7 +49,7 @@ func (l *inMemoryLikeRepo) Save(ctx context.Context, like *models.Like) (int, er
 
 func (l *inMemoryLikeRepo) FindLikeById(ctx context.Context, likeID int) (*models.Like, error) {
 	queryFind, args, err := l.psql.
-		Select("id", "created_at", "post_id", "like_id").
+		Select("id", "created_at", "post_id", "user_id").
 		From("likes").
 		Where(squirrel.Eq{"id": likeID}).
 		ToSql()
@@ -59,7 +59,12 @@ func (l *inMemoryLikeRepo) FindLikeById(ctx context.Context, likeID int) (*model
 	}
 
 	like := &models.Like{}
-	if err := l.pool.QueryRow(ctx, queryFind, args...).Scan(like); err != nil {
+	if err := l.pool.QueryRow(ctx, queryFind, args...).Scan(
+		&like.ID,
+		&like.CreatedAt,
+		&like.PostID,
+		&like.UserID,
+	); err != nil {
 		return nil, err
 	}
 
@@ -68,7 +73,7 @@ func (l *inMemoryLikeRepo) FindLikeById(ctx context.Context, likeID int) (*model
 
 func (l *inMemoryLikeRepo) GetAllLikes(ctx context.Context) (map[int]*models.Like, error) {
 	queryFind, args, err := l.psql.
-		Select("id", "created_at", "post_id", "like_id").
+		Select("id", "created_at", "post_id", "user_id").
 		From("likes").
 		ToSql()
 

@@ -22,7 +22,7 @@ const defaultConnectTimeout = time.Second * 5
 
 func NewPostgresPool(lg logger.Logger) (*pgxpool.Pool, error) {
 	wd, _ := os.Getwd()
-	envPath := filepath.Join(filepath.Dir(wd), ".env")
+	envPath := filepath.Join(wd, "..", ".env")
 	_ = godotenv.Load(envPath)
 
 	dbURL := fmt.Sprintf(

@@ -73,7 +73,14 @@ func BenchmarkCreateLike(b *testing.B) {
 	)
 
 	ctx := context.Background()
-	pool, _ := db.NewPostgresPool(lg)
+
+	pool, err := db.NewPostgresPool(lg)
+	if err != nil {
+		b.Fatalf("NewPostgresPool failed: %v", err)
+	}
+
+	defer pool.Close()
+
 	likeRepo := like.NewInMemoryLikeRepo(pool)
 
 	mockUserService := &mockUserService{}
@@ -96,7 +103,13 @@ func BenchmarkGetLikeById(b *testing.B) {
 	)
 
 	ctx := context.Background()
-	pool, _ := db.NewPostgresPool(lg)
+	pool, err := db.NewPostgresPool(lg)
+	if err != nil {
+		b.Fatalf("NewPostgresPool failed: %v", err)
+	}
+
+	defer pool.Close()
+
 	likeRepo := like.NewInMemoryLikeRepo(pool)
 
 	mockUserService := &mockUserService{}
@@ -125,7 +138,14 @@ func BenchmarkGetAllLikes(b *testing.B) {
 	)
 
 	ctx := context.Background()
-	pool, _ := db.NewPostgresPool(lg)
+
+	pool, err := db.NewPostgresPool(lg)
+	if err != nil {
+		b.Fatalf("NewPostgresPool failed: %v", err)
+	}
+
+	defer pool.Close()
+
 	likeRepo := like.NewInMemoryLikeRepo(pool)
 
 	mockUserService := &mockUserService{}
