@@ -71,7 +71,8 @@ func (l *LikeHTTPHandler) HandlerCreateLike(w http.ResponseWriter, r *http.Reque
 }
 
 func (l *LikeHTTPHandler) HandlerGetAllLikes(w http.ResponseWriter, r *http.Request) {
-	likes, err := l.LikeService.GetAllLikes()
+	ctx := r.Context()
+	likes, err := l.LikeService.GetAllLikes(ctx)
 	if err != nil {
 		l.sendError(w, err.Error(), http.StatusBadRequest)
 		return

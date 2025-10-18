@@ -11,11 +11,10 @@ import (
 var usernameRegex = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9]*$`)
 
 type User struct {
-	Username    string
-	Email       string
-	Password    string
-	ID          int
-	PostHistory map[int]struct{} // key = postID
+	Username string
+	Email    string
+	Password string
+	ID       int
 }
 
 func NewUser(username string, email string, password string) (*User, error) {

@@ -33,6 +33,7 @@ func (h *PostHTTPHandler) sendError(w http.ResponseWriter, message string, statu
 
 func (p *PostHTTPHandler) HandlerCreatePost(w http.ResponseWriter, r *http.Request) {
 	var postDTO dto.PostDTO
+	ctx := r.Context()
 
 	// Check to get PostDTO from request body
 	if err := json.NewDecoder(r.Body).Decode(&postDTO); err != nil {
@@ -40,13 +41,13 @@ func (p *PostHTTPHandler) HandlerCreatePost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	postID, err := p.PostService.CreatePost(postDTO.UserID, postDTO.Text)
+	postID, err := p.PostService.CreatePost(ctx, postDTO.UserID, postDTO.Text)
 	if err != nil {
 		p.sendError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	post, err := p.PostService.GetPostByID(postID)
+	post, err := p.PostService.GetPostByID(ctx, postID)
 	if err != nil {
 		p.sendError(w, err.Error(), http.StatusBadRequest)
 		return
@@ -62,7 +63,8 @@ func (p *PostHTTPHandler) HandlerCreatePost(w http.ResponseWriter, r *http.Reque
 }
 
 func (p *PostHTTPHandler) HandlerGetAllPosts(w http.ResponseWriter, r *http.Request) {
-	posts, err := p.PostService.GetAllPosts()
+	ctx := r.Context()
+	posts, err := p.PostService.GetAllPosts(ctx)
 	if err != nil {
 		p.sendError(w, err.Error(), http.StatusBadRequest)
 		return

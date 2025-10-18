@@ -16,4 +16,5 @@ const (
 	SourceHandler Source = "HANDLER"
 	SourceService Source = "SERVICE"
 	SourceRepo    Source = "REPO"
+	SourceDB      Source = "DB"
 )

@@ -1,68 +1,69 @@
 package user
 
 import (
-	"sync"
+	"context"
 
+	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5/pgxpool"
 	customErrors "github.com/lsmltesting/MicroBlog/internal/errors"
 	"github.com/lsmltesting/MicroBlog/internal/models"
 )
 
 type UserRepository interface {
-	Save(user *models.User) (int, error)
-	FindUserByID(ID int) (*models.User, error)
-	UpdatePostHistory(userID int, postID int) error
+	Save(ctx context.Context, user *models.User) (int, error)
+	FindUserByID(ctx context.Context, ID int) (*models.User, error)
 }
 
 type inMemoryUserRepo struct {
-	mtx    sync.RWMutex
-	data   map[int]*models.User
-	lastID int
+	pool *pgxpool.Pool
+	psql squirrel.StatementBuilderType
 }
 
-func NewInMemoryUserRepo() UserRepository {
+func NewInMemoryUserRepo(pool *pgxpool.Pool) UserRepository {
 	return &inMemoryUserRepo{
-		data: make(map[int]*models.User),
+		pool: pool,
+		psql: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 }
 
-func (r *inMemoryUserRepo) Save(user *models.User) (int, error) {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
+func (r *inMemoryUserRepo) Save(ctx context.Context, user *models.User) (int, error) {
+	querySave, args, err := r.psql.
+		Insert("users").
+		Columns("username", "email", "password").
+		Values(user.Username, user.Email, user.Password).
+		Suffix("returning id").
+		ToSql()
+	if err != nil {
+		return 0, customErrors.ErrFailedBuildQueryForPSQL
+	}
 
-	r.lastID++
+	var id int
+	if err := r.pool.QueryRow(ctx, querySave, args...).Scan(&id); err != nil {
+		return 0, customErrors.ErrFailedCreateUserInPSQL
+	}
 
-	user.ID = r.lastID
-	r.data[r.lastID] = user
-
-	return r.lastID, nil
+	return id, nil
 }
 
-func (r *inMemoryUserRepo) FindUserByID(ID int) (*models.User, error) {
-	r.mtx.RLock()
-	defer r.mtx.RUnlock()
+func (r *inMemoryUserRepo) FindUserByID(ctx context.Context, ID int) (*models.User, error) {
 
-	user, ok := r.data[ID]
-	if !ok {
-		return nil, customErrors.ErrNotFindUser
+	queryFindUser, args, err := r.psql.
+		Select("id", "username", "email", "password").
+		From("users").
+		Where(squirrel.Eq{"id": ID}).
+		ToSql()
+	if err != nil {
+		return nil, customErrors.ErrFailedBuildQueryForPSQL
+	}
+	user := &models.User{}
+	if err := r.pool.QueryRow(ctx, queryFindUser, args...).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+	); err != nil {
+		return nil, err
 	}
 
 	return user, nil
-}
-
-func (r *inMemoryUserRepo) UpdatePostHistory(userID int, postID int) error {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
-	user, ok := r.data[userID]
-	if !ok {
-		return customErrors.ErrNotFindUser
-	}
-
-	if user.PostHistory == nil {
-		user.PostHistory = make(map[int]struct{})
-	}
-
-	user.PostHistory[postID] = struct{}{}
-
-	return nil
 }

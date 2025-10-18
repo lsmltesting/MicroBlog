@@ -7,12 +7,11 @@ import (
 )
 
 type Post struct {
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	Text         string
-	UserID       int
-	HistoryLikes map[int]struct{} // key = LikeID
-	ID           int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Text      string
+	UserID    int
+	ID        int
 }
 
 func NewPost(userID int, text string) (*Post, error) {
@@ -39,14 +38,3 @@ func (post *Post) SetText(text string) error {
 	post.UpdatedAt = time.Now()
 	return nil
 }
-
-// func (post *Post) SetLike(userID int, likeID int) error {
-
-// 	// Check if like from userId is already created
-// 	if _, ok := post.HistoryLikes[userID]; !ok {
-// 		return errors.ErrPostLikeAlreadyCreated
-// 	}
-
-// 	post.HistoryLikes[userID] = struct{}{}
-// 	return nil
-// }

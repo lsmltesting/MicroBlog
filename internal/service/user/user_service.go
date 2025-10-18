@@ -1,14 +1,15 @@
 package user
 
 import (
+	"context"
+
 	"github.com/lsmltesting/MicroBlog/internal/models"
 	"github.com/lsmltesting/MicroBlog/internal/repo/user"
 )
 
 type UserService interface {
-	CreateUser(username string, email string, password string) (int, error)
-	GetUserByID(ID int) (*models.User, error)
-	UpdatePostHistory(userID int, postID int) error
+	CreateUser(ctx context.Context, username string, email string, password string) (int, error)
+	GetUserByID(ctx context.Context, ID int) (*models.User, error)
 }
 
 type userService struct {
@@ -21,18 +22,14 @@ func NewUserService(repo user.UserRepository) UserService {
 	}
 }
 
-func (s *userService) CreateUser(username string, email string, password string) (int, error) {
+func (s *userService) CreateUser(ctx context.Context, username string, email string, password string) (int, error) {
 	user, err := models.NewUser(username, email, password)
 	if err != nil {
 		return 0, err
 	}
-	return s.repo.Save(user)
+	return s.repo.Save(ctx, user)
 }
 
-func (s *userService) GetUserByID(ID int) (*models.User, error) {
-	return s.repo.FindUserByID(ID)
-}
-
-func (s *userService) UpdatePostHistory(userID int, postID int) error {
-	return s.repo.UpdatePostHistory(userID, postID)
+func (s *userService) GetUserByID(ctx context.Context, ID int) (*models.User, error) {
+	return s.repo.FindUserByID(ctx, ID)
 }

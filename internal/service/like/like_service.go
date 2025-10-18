@@ -1,6 +1,8 @@
 package like
 
 import (
+	"context"
+
 	"github.com/lsmltesting/MicroBlog/internal/models"
 	"github.com/lsmltesting/MicroBlog/internal/repo/like"
 	"github.com/lsmltesting/MicroBlog/internal/service/post"
@@ -8,9 +10,9 @@ import (
 )
 
 type LikeService interface {
-	CreateLike(userID int, postID int) (int, error)
-	GetLikeById(likeID int) (*models.Like, error)
-	GetAllLikes() (map[int]*models.Like, error)
+	CreateLike(ctx context.Context, userID int, postID int) (int, error)
+	GetLikeById(ctx context.Context, likeID int) (*models.Like, error)
+	GetAllLikes(ctx context.Context) (map[int]*models.Like, error)
 }
 
 type likeService struct {
@@ -32,15 +34,15 @@ func NewLikeService(
 	}
 }
 
-func (l *likeService) CreateLike(userID int, postID int) (int, error) {
+func (l *likeService) CreateLike(ctx context.Context, userID int, postID int) (int, error) {
 	// Check if user exists
-	_, err := l.userService.GetUserByID(userID)
+	_, err := l.userService.GetUserByID(ctx, userID)
 	if err != nil {
 		return 0, err
 	}
 
 	// Check if post exists
-	_, err = l.postService.GetPostByID(postID)
+	_, err = l.postService.GetPostByID(ctx, postID)
 	if err != nil {
 		return 0, err
 	}
@@ -48,12 +50,7 @@ func (l *likeService) CreateLike(userID int, postID int) (int, error) {
 	like := models.NewLike(userID, postID)
 
 	// First save like in repo. After saving like will have actual ID
-	likeID, err := l.repo.Save(like)
-	if err != nil {
-		return 0, err
-	}
-
-	err = l.postService.UpdateLikeHistory(postID, likeID)
+	likeID, err := l.repo.Save(ctx, like)
 	if err != nil {
 		return 0, err
 	}
@@ -61,10 +58,10 @@ func (l *likeService) CreateLike(userID int, postID int) (int, error) {
 	return likeID, nil
 }
 
-func (l *likeService) GetLikeById(likeID int) (*models.Like, error) {
-	return l.repo.FindLikeById(likeID)
+func (l *likeService) GetLikeById(ctx context.Context, likeID int) (*models.Like, error) {
+	return l.repo.FindLikeById(ctx, likeID)
 }
 
-func (l *likeService) GetAllLikes() (map[int]*models.Like, error) {
-	return l.repo.GetAllLikes()
+func (l *likeService) GetAllLikes(ctx context.Context) (map[int]*models.Like, error) {
+	return l.repo.GetAllLikes(ctx)
 }

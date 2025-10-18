@@ -1,6 +1,7 @@
 package post
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/lsmltesting/MicroBlog/internal/logger"
@@ -19,7 +20,7 @@ func NewPostServiceDecorator(postService PostService, lg logger.Logger) PostServ
 	}
 }
 
-func (p *postServiceDecorator) CreatePost(userID int, text string) (int, error) {
+func (p *postServiceDecorator) CreatePost(ctx context.Context, userID int, text string) (int, error) {
 	p.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -30,7 +31,7 @@ func (p *postServiceDecorator) CreatePost(userID int, text string) (int, error) 
 		"CreatePost from post service is called",
 	)
 
-	postID, err := p.postService.CreatePost(userID, text)
+	postID, err := p.postService.CreatePost(ctx, userID, text)
 	if err != nil {
 		p.lg.AddLog(
 			logger.LevelError,
@@ -58,7 +59,7 @@ func (p *postServiceDecorator) CreatePost(userID int, text string) (int, error) 
 	return postID, err
 }
 
-func (p *postServiceDecorator) GetPostByID(postID int) (*models.Post, error) {
+func (p *postServiceDecorator) GetPostByID(ctx context.Context, postID int) (*models.Post, error) {
 	p.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -68,7 +69,7 @@ func (p *postServiceDecorator) GetPostByID(postID int) (*models.Post, error) {
 		"GetPostByID from post service is called",
 	)
 
-	postModel, err := p.postService.GetPostByID(postID)
+	postModel, err := p.postService.GetPostByID(ctx, postID)
 
 	if err != nil {
 		p.lg.AddLog(
@@ -93,7 +94,7 @@ func (p *postServiceDecorator) GetPostByID(postID int) (*models.Post, error) {
 	return postModel, err
 }
 
-func (p *postServiceDecorator) GetAllPosts() (map[int]*models.Post, error) {
+func (p *postServiceDecorator) GetAllPosts(ctx context.Context) (map[int]*models.Post, error) {
 	p.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -101,7 +102,7 @@ func (p *postServiceDecorator) GetAllPosts() (map[int]*models.Post, error) {
 		"GetAllPosts from post service is called",
 	)
 
-	postModel, err := p.postService.GetAllPosts()
+	postModel, err := p.postService.GetAllPosts(ctx)
 
 	if err != nil {
 		p.lg.AddLog(
@@ -120,33 +121,4 @@ func (p *postServiceDecorator) GetAllPosts() (map[int]*models.Post, error) {
 	}
 
 	return postModel, err
-}
-
-func (p *postServiceDecorator) UpdateLikeHistory(postID int, likeID int) error {
-	p.lg.AddLog(
-		logger.LevelInfo,
-		logger.SourceService,
-		make(map[string]string),
-		"UpdateLikeHistory from post service is called",
-	)
-
-	err := p.postService.UpdateLikeHistory(postID, likeID)
-
-	if err != nil {
-		p.lg.AddLog(
-			logger.LevelError,
-			logger.SourceService,
-			make(map[string]string),
-			err.Error(),
-		)
-	} else {
-		p.lg.AddLog(
-			logger.LevelInfo,
-			logger.SourceService,
-			make(map[string]string),
-			"UpdateLikeHistory called successfully",
-		)
-	}
-
-	return err
 }

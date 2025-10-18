@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"context"
 	"time"
 
 	customErrors "github.com/lsmltesting/MicroBlog/internal/errors"
@@ -32,14 +33,14 @@ type LikeQueueConfig struct {
 	Workers    int
 }
 
-func NewLikeQueue(config LikeQueueConfig, likeService like.LikeService) LikeQueue {
+func NewLikeQueue(ctx context.Context, config LikeQueueConfig, likeService like.LikeService) LikeQueue {
 	q := &likeQueueImplement{
 		qLike:       make(chan LikeForChan, config.BufferSize),
 		workers:     config.Workers,
 		stop:        make(chan struct{}),
 		likeService: likeService,
 	}
-	q.startWorkers()
+	q.startWorkers(ctx)
 
 	return q
 }
