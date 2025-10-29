@@ -10,9 +10,9 @@ import (
 )
 
 type LikeRepository interface {
-	Save(ctx context.Context, like *models.Like) (int, error)
-	FindLikeById(ctx context.Context, likeID int) (*models.Like, error)
-	GetAllLikes(ctx context.Context) (map[int]*models.Like, error)
+	Create(ctx context.Context, like *models.Like) (int, error)
+	FindById(ctx context.Context, likeID int) (*models.Like, error)
+	GetAll(ctx context.Context) (map[int]*models.Like, error)
 }
 
 type inMemoryLikeRepo struct {
@@ -27,7 +27,7 @@ func NewInMemoryLikeRepo(pool *pgxpool.Pool) LikeRepository {
 	}
 }
 
-func (l *inMemoryLikeRepo) Save(ctx context.Context, like *models.Like) (int, error) {
+func (l *inMemoryLikeRepo) Create(ctx context.Context, like *models.Like) (int, error) {
 	querySave, args, err := l.psql.
 		Insert("likes").
 		Columns("created_at", "post_id", "user_id").
@@ -47,7 +47,7 @@ func (l *inMemoryLikeRepo) Save(ctx context.Context, like *models.Like) (int, er
 	return id, nil
 }
 
-func (l *inMemoryLikeRepo) FindLikeById(ctx context.Context, likeID int) (*models.Like, error) {
+func (l *inMemoryLikeRepo) FindById(ctx context.Context, likeID int) (*models.Like, error) {
 	queryFind, args, err := l.psql.
 		Select("id", "created_at", "post_id", "user_id").
 		From("likes").
@@ -71,7 +71,7 @@ func (l *inMemoryLikeRepo) FindLikeById(ctx context.Context, likeID int) (*model
 	return like, nil
 }
 
-func (l *inMemoryLikeRepo) GetAllLikes(ctx context.Context) (map[int]*models.Like, error) {
+func (l *inMemoryLikeRepo) GetAll(ctx context.Context) (map[int]*models.Like, error) {
 	queryFind, args, err := l.psql.
 		Select("id", "created_at", "post_id", "user_id").
 		From("likes").

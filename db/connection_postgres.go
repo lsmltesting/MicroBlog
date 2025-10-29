@@ -20,7 +20,7 @@ const defaultMaxConnIdleTime = time.Minute * 30
 const defaultHealthCheckPeriod = time.Minute
 const defaultConnectTimeout = time.Second * 5
 
-func NewPostgresPool(lg logger.Logger) (*pgxpool.Pool, error) {
+func NewPostgresPool(lg logger.Logger, ctx context.Context) (*pgxpool.Pool, error) {
 	wd, _ := os.Getwd()
 	envPath := filepath.Join(wd, "..", ".env")
 	_ = godotenv.Load(envPath)
@@ -52,9 +52,6 @@ func NewPostgresPool(lg logger.Logger) (*pgxpool.Pool, error) {
 	dbConfig.MaxConnIdleTime = defaultMaxConnIdleTime
 	dbConfig.HealthCheckPeriod = defaultHealthCheckPeriod
 	dbConfig.ConnConfig.ConnectTimeout = defaultConnectTimeout
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
 	pool, err := pgxpool.NewWithConfig(ctx, dbConfig)
 	if err != nil {

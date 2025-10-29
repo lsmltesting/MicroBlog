@@ -31,7 +31,7 @@ func (h *PostHTTPHandler) sendError(w http.ResponseWriter, message string, statu
 	http.Error(w, errUserDTO.ToString(), statusCode)
 }
 
-func (p *PostHTTPHandler) HandlerCreatePost(w http.ResponseWriter, r *http.Request) {
+func (p *PostHTTPHandler) HandlerCreate(w http.ResponseWriter, r *http.Request) {
 	var postDTO dto.PostDTO
 	ctx := r.Context()
 
@@ -41,13 +41,13 @@ func (p *PostHTTPHandler) HandlerCreatePost(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	postID, err := p.PostService.CreatePost(ctx, postDTO.UserID, postDTO.Text)
+	postID, err := p.PostService.Create(ctx, postDTO.UserID, postDTO.Text)
 	if err != nil {
 		p.sendError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	post, err := p.PostService.GetPostByID(ctx, postID)
+	post, err := p.PostService.FindByID(ctx, postID)
 	if err != nil {
 		p.sendError(w, err.Error(), http.StatusBadRequest)
 		return
@@ -62,9 +62,9 @@ func (p *PostHTTPHandler) HandlerCreatePost(w http.ResponseWriter, r *http.Reque
 	w.Write(b)
 }
 
-func (p *PostHTTPHandler) HandlerGetAllPosts(w http.ResponseWriter, r *http.Request) {
+func (p *PostHTTPHandler) HandlerGetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	posts, err := p.PostService.GetAllPosts(ctx)
+	posts, err := p.PostService.GetAll(ctx)
 	if err != nil {
 		p.sendError(w, err.Error(), http.StatusBadRequest)
 		return

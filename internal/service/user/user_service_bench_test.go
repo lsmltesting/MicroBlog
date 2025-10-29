@@ -17,8 +17,8 @@ func BenchmarkCreateUser(b *testing.B) {
 			Workers:    6,
 		},
 	)
-
-	pool, _ := db.NewPostgresPool(lg)
+	ctx := context.Background()
+	pool, _ := db.NewPostgresPool(lg, ctx)
 
 	userRepo := user.NewInMemoryUserRepo(pool)
 	userService := NewUserService(userRepo)
@@ -37,10 +37,9 @@ func BenchmarkCreateUser(b *testing.B) {
 		users[i].password = fmt.Sprintf("testPassword123qwerty-%d", i)
 	}
 
-	ctx := context.Background()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		userService.CreateUser(ctx, users[i].username, users[i].email, users[i].password)
+		userService.Create(ctx, users[i].username, users[i].email, users[i].password)
 	}
 }
 
@@ -51,16 +50,16 @@ func BenchmarkGetUserByID(b *testing.B) {
 			Workers:    6,
 		},
 	)
+	ctx := context.Background()
 
-	pool, _ := db.NewPostgresPool(lg)
+	pool, _ := db.NewPostgresPool(lg, ctx)
 	userRepo := user.NewInMemoryUserRepo(pool)
 	userService := NewUserService(userRepo)
 
 	usersID := make([]int, b.N)
-	ctx := context.Background()
 
 	for i := 0; i < b.N; i++ {
-		userID, _ := userService.CreateUser(
+		userID, _ := userService.Create(
 			ctx,
 			fmt.Sprintf("testUsername-%d", i),
 			fmt.Sprintf("testemail-%d@gtest.ru", i),
@@ -71,6 +70,6 @@ func BenchmarkGetUserByID(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		userService.GetUserByID(ctx, usersID[i])
+		userService.FindByID(ctx, usersID[i])
 	}
 }

@@ -13,12 +13,12 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) Save(ctx context.Context, user *models.User) (int, error) {
+func (m *MockUserRepository) Create(ctx context.Context, user *models.User) (int, error) {
 	args := m.Called(ctx, user)
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockUserRepository) FindUserByID(ctx context.Context, ID int) (*models.User, error) {
+func (m *MockUserRepository) FindByID(ctx context.Context, ID int) (*models.User, error) {
 	args := m.Called(ctx, ID)
 	return args.Get(0).(*models.User), args.Error(1)
 }
@@ -34,7 +34,7 @@ func TestUserService_CreateUser_Success(t *testing.T) {
 		return user.Username == "testingUser" && user.Email == "test@gmail.com"
 	})).Return(testID, nil)
 
-	userId, err := service.CreateUser(ctx, "testingUser", "test@gmail.com", "sdfmdsfmsdkfm123")
+	userId, err := service.Create(ctx, "testingUser", "test@gmail.com", "sdfmdsfmsdkfm123")
 
 	assert.NoError(t, err)
 	assert.Equal(t, testID, userId)
@@ -52,7 +52,7 @@ func TestUserService_CreateUser_Error(t *testing.T) {
 	//Set up mock for Save() that Save() return error
 	mockRepo.On("Save", ctx, mock.Anything).Return(0, assert.AnError)
 
-	userId, err := service.CreateUser(ctx, "testgingUser", "test@gmail.com", "password123")
+	userId, err := service.Create(ctx, "testgingUser", "test@gmail.com", "password123")
 
 	assert.Error(t, err)
 	assert.Equal(t, 0, userId)
@@ -77,7 +77,7 @@ func TestUserService_GetUserByID_Success(t *testing.T) {
 	//Set up mock for FindUserByID()
 	mockRepo.On("FindUserByID", ctx, userID).Return(expectedUser, nil)
 
-	user, err := service.GetUserByID(ctx, userID)
+	user, err := service.FindByID(ctx, userID)
 
 	assert.NoError(t, err)
 	assert.Equal(t, user, expectedUser)
@@ -94,7 +94,7 @@ func TestUserService_GetUserByID_NotFound(t *testing.T) {
 
 	mockRepo.On("FindUserByID", ctx, mock.Anything).Return((*models.User)(nil), assert.AnError)
 
-	user, err := service.GetUserByID(ctx, userID)
+	user, err := service.FindByID(ctx, userID)
 
 	assert.Error(t, err)
 	assert.Nil(t, user)

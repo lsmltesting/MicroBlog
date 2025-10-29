@@ -20,7 +20,7 @@ func NewLikeServiceDecorator(likeService LikeService, lg logger.Logger) LikeServ
 	}
 }
 
-func (l *likeServiceDecorator) CreateLike(ctx context.Context, userID int, postID int) (int, error) {
+func (l *likeServiceDecorator) Create(ctx context.Context, userID int, postID int) (int, error) {
 	l.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -31,7 +31,7 @@ func (l *likeServiceDecorator) CreateLike(ctx context.Context, userID int, postI
 		"CreateLike from like service is called",
 	)
 
-	likeID, err := l.likeService.CreateLike(ctx, userID, postID)
+	likeID, err := l.likeService.Create(ctx, userID, postID)
 
 	if err != nil {
 		l.lg.AddLog(
@@ -58,8 +58,8 @@ func (l *likeServiceDecorator) CreateLike(ctx context.Context, userID int, postI
 	return likeID, err
 }
 
-func (l *likeServiceDecorator) GetLikeById(ctx context.Context, likeID int) (*models.Like, error) {
-	likeModel, err := l.likeService.GetLikeById(ctx, likeID)
+func (l *likeServiceDecorator) FindById(ctx context.Context, likeID int) (*models.Like, error) {
+	likeModel, err := l.likeService.FindById(ctx, likeID)
 
 	l.lg.AddLog(
 		logger.LevelInfo,
@@ -93,8 +93,8 @@ func (l *likeServiceDecorator) GetLikeById(ctx context.Context, likeID int) (*mo
 	return likeModel, err
 }
 
-func (l *likeServiceDecorator) GetAllLikes(ctx context.Context) (map[int]*models.Like, error) {
-	mapLike, err := l.likeService.GetAllLikes(ctx)
+func (l *likeServiceDecorator) GetAll(ctx context.Context) (map[int]*models.Like, error) {
+	mapLike, err := l.likeService.GetAll(ctx)
 
 	l.lg.AddLog(
 		logger.LevelInfo,

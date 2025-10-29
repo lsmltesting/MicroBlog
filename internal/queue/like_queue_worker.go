@@ -36,7 +36,7 @@ func (l *likeQueueImplement) worker(ctx context.Context, workerID int) {
 }
 
 func (l *likeQueueImplement) handleQueue(ctx context.Context, likeForChan LikeForChan) (int, error) {
-	likeID, err := l.likeService.CreateLike(ctx, likeForChan.UserID, likeForChan.PostID)
+	likeID, err := l.likeService.Create(ctx, likeForChan.UserID, likeForChan.PostID)
 	if err != nil {
 		return 0, err
 	}

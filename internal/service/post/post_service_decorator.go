@@ -20,7 +20,7 @@ func NewPostServiceDecorator(postService PostService, lg logger.Logger) PostServ
 	}
 }
 
-func (p *postServiceDecorator) CreatePost(ctx context.Context, userID int, text string) (int, error) {
+func (p *postServiceDecorator) Create(ctx context.Context, userID int, text string) (int, error) {
 	p.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -31,7 +31,7 @@ func (p *postServiceDecorator) CreatePost(ctx context.Context, userID int, text 
 		"CreatePost from post service is called",
 	)
 
-	postID, err := p.postService.CreatePost(ctx, userID, text)
+	postID, err := p.postService.Create(ctx, userID, text)
 	if err != nil {
 		p.lg.AddLog(
 			logger.LevelError,
@@ -59,7 +59,7 @@ func (p *postServiceDecorator) CreatePost(ctx context.Context, userID int, text 
 	return postID, err
 }
 
-func (p *postServiceDecorator) GetPostByID(ctx context.Context, postID int) (*models.Post, error) {
+func (p *postServiceDecorator) FindByID(ctx context.Context, postID int) (*models.Post, error) {
 	p.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -69,7 +69,7 @@ func (p *postServiceDecorator) GetPostByID(ctx context.Context, postID int) (*mo
 		"GetPostByID from post service is called",
 	)
 
-	postModel, err := p.postService.GetPostByID(ctx, postID)
+	postModel, err := p.postService.FindByID(ctx, postID)
 
 	if err != nil {
 		p.lg.AddLog(
@@ -94,7 +94,7 @@ func (p *postServiceDecorator) GetPostByID(ctx context.Context, postID int) (*mo
 	return postModel, err
 }
 
-func (p *postServiceDecorator) GetAllPosts(ctx context.Context) (map[int]*models.Post, error) {
+func (p *postServiceDecorator) GetAll(ctx context.Context) (map[int]*models.Post, error) {
 	p.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -102,7 +102,7 @@ func (p *postServiceDecorator) GetAllPosts(ctx context.Context) (map[int]*models
 		"GetAllPosts from post service is called",
 	)
 
-	postModel, err := p.postService.GetAllPosts(ctx)
+	postModel, err := p.postService.GetAll(ctx)
 
 	if err != nil {
 		p.lg.AddLog(

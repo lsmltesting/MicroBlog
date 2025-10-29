@@ -10,8 +10,8 @@ import (
 )
 
 type UserRepository interface {
-	Save(ctx context.Context, user *models.User) (int, error)
-	FindUserByID(ctx context.Context, ID int) (*models.User, error)
+	Create(ctx context.Context, user *models.User) (int, error)
+	FindByID(ctx context.Context, ID int) (*models.User, error)
 }
 
 type inMemoryUserRepo struct {
@@ -26,7 +26,7 @@ func NewInMemoryUserRepo(pool *pgxpool.Pool) UserRepository {
 	}
 }
 
-func (r *inMemoryUserRepo) Save(ctx context.Context, user *models.User) (int, error) {
+func (r *inMemoryUserRepo) Create(ctx context.Context, user *models.User) (int, error) {
 	querySave, args, err := r.psql.
 		Insert("users").
 		Columns("username", "email", "password").
@@ -45,7 +45,7 @@ func (r *inMemoryUserRepo) Save(ctx context.Context, user *models.User) (int, er
 	return id, nil
 }
 
-func (r *inMemoryUserRepo) FindUserByID(ctx context.Context, ID int) (*models.User, error) {
+func (r *inMemoryUserRepo) FindByID(ctx context.Context, ID int) (*models.User, error) {
 
 	queryFindUser, args, err := r.psql.
 		Select("id", "username", "email", "password").

@@ -20,7 +20,7 @@ func NewUserServiceDecorator(userService UserService, lg logger.Logger) UserServ
 	}
 }
 
-func (u *userServiceDecorator) CreateUser(ctx context.Context, username string, email string, password string) (int, error) {
+func (u *userServiceDecorator) Create(ctx context.Context, username string, email string, password string) (int, error) {
 	u.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -32,7 +32,7 @@ func (u *userServiceDecorator) CreateUser(ctx context.Context, username string, 
 		"CreateUser from like service is called",
 	)
 
-	userID, err := u.userService.CreateUser(ctx, username, email, password)
+	userID, err := u.userService.Create(ctx, username, email, password)
 
 	if err != nil {
 		u.lg.AddLog(
@@ -60,7 +60,7 @@ func (u *userServiceDecorator) CreateUser(ctx context.Context, username string, 
 
 	return userID, err
 }
-func (u *userServiceDecorator) GetUserByID(ctx context.Context, ID int) (*models.User, error) {
+func (u *userServiceDecorator) FindByID(ctx context.Context, ID int) (*models.User, error) {
 	u.lg.AddLog(
 		logger.LevelInfo,
 		logger.SourceService,
@@ -70,7 +70,7 @@ func (u *userServiceDecorator) GetUserByID(ctx context.Context, ID int) (*models
 		"GetUserByID from like service is called",
 	)
 
-	userModel, err := u.userService.GetUserByID(ctx, ID)
+	userModel, err := u.userService.FindByID(ctx, ID)
 
 	if err != nil {
 		u.lg.AddLog(

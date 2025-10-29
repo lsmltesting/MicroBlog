@@ -10,9 +10,9 @@ import (
 )
 
 type LikeService interface {
-	CreateLike(ctx context.Context, userID int, postID int) (int, error)
-	GetLikeById(ctx context.Context, likeID int) (*models.Like, error)
-	GetAllLikes(ctx context.Context) (map[int]*models.Like, error)
+	Create(ctx context.Context, userID int, postID int) (int, error)
+	FindById(ctx context.Context, likeID int) (*models.Like, error)
+	GetAll(ctx context.Context) (map[int]*models.Like, error)
 }
 
 type likeService struct {
@@ -34,15 +34,15 @@ func NewLikeService(
 	}
 }
 
-func (l *likeService) CreateLike(ctx context.Context, userID int, postID int) (int, error) {
+func (l *likeService) Create(ctx context.Context, userID int, postID int) (int, error) {
 	// Check if user exists
-	_, err := l.userService.GetUserByID(ctx, userID)
+	_, err := l.userService.FindByID(ctx, userID)
 	if err != nil {
 		return 0, err
 	}
 
 	// Check if post exists
-	_, err = l.postService.GetPostByID(ctx, postID)
+	_, err = l.postService.FindByID(ctx, postID)
 	if err != nil {
 		return 0, err
 	}
@@ -50,7 +50,7 @@ func (l *likeService) CreateLike(ctx context.Context, userID int, postID int) (i
 	like := models.NewLike(userID, postID)
 
 	// First save like in repo. After saving like will have actual ID
-	likeID, err := l.repo.Save(ctx, like)
+	likeID, err := l.repo.Create(ctx, like)
 	if err != nil {
 		return 0, err
 	}
@@ -58,10 +58,10 @@ func (l *likeService) CreateLike(ctx context.Context, userID int, postID int) (i
 	return likeID, nil
 }
 
-func (l *likeService) GetLikeById(ctx context.Context, likeID int) (*models.Like, error) {
-	return l.repo.FindLikeById(ctx, likeID)
+func (l *likeService) FindById(ctx context.Context, likeID int) (*models.Like, error) {
+	return l.repo.FindById(ctx, likeID)
 }
 
-func (l *likeService) GetAllLikes(ctx context.Context) (map[int]*models.Like, error) {
-	return l.repo.GetAllLikes(ctx)
+func (l *likeService) GetAll(ctx context.Context) (map[int]*models.Like, error) {
+	return l.repo.GetAll(ctx)
 }

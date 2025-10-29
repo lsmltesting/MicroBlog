@@ -9,9 +9,9 @@ import (
 )
 
 type PostService interface {
-	CreatePost(ctx context.Context, user int, text string) (int, error)
-	GetPostByID(ctx context.Context, postID int) (*models.Post, error)
-	GetAllPosts(ctx context.Context) (map[int]*models.Post, error)
+	Create(ctx context.Context, user int, text string) (int, error)
+	FindByID(ctx context.Context, postID int) (*models.Post, error)
+	GetAll(ctx context.Context) (map[int]*models.Post, error)
 }
 
 type postService struct {
@@ -26,9 +26,9 @@ func NewPostService(repo post.PostRepository, userService user.UserService) Post
 	}
 }
 
-func (s *postService) CreatePost(ctx context.Context, userID int, text string) (int, error) {
+func (s *postService) Create(ctx context.Context, userID int, text string) (int, error) {
 	// Check if user with shared userId is exists
-	_, err := s.userService.GetUserByID(ctx, userID)
+	_, err := s.userService.FindByID(ctx, userID)
 	if err != nil {
 		return 0, err
 	}
@@ -39,7 +39,7 @@ func (s *postService) CreatePost(ctx context.Context, userID int, text string) (
 	}
 
 	// After creating post update user's posthistory map
-	postID, err := s.repo.Save(ctx, post)
+	postID, err := s.repo.Create(ctx, post)
 	if err != nil {
 		return 0, err
 	}
@@ -47,10 +47,10 @@ func (s *postService) CreatePost(ctx context.Context, userID int, text string) (
 	return postID, nil
 }
 
-func (s *postService) GetPostByID(ctx context.Context, postID int) (*models.Post, error) {
-	return s.repo.FindPostByID(ctx, postID)
+func (s *postService) FindByID(ctx context.Context, postID int) (*models.Post, error) {
+	return s.repo.FindByID(ctx, postID)
 }
 
-func (s *postService) GetAllPosts(ctx context.Context) (map[int]*models.Post, error) {
-	return s.repo.GetAllPosts(ctx)
+func (s *postService) GetAll(ctx context.Context) (map[int]*models.Post, error) {
+	return s.repo.GetAll(ctx)
 }

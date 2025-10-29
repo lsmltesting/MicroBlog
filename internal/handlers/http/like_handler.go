@@ -33,7 +33,7 @@ func (l *LikeHTTPHandler) sendError(w http.ResponseWriter, message string, statu
 	http.Error(w, errUserDTO.ToString(), statusCode)
 }
 
-func (l *LikeHTTPHandler) HandlerCreateLike(w http.ResponseWriter, r *http.Request) {
+func (l *LikeHTTPHandler) HandlerCreate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	postID, err := strconv.Atoi(vars["post_id"])
@@ -70,9 +70,9 @@ func (l *LikeHTTPHandler) HandlerCreateLike(w http.ResponseWriter, r *http.Reque
 	w.Write(b)
 }
 
-func (l *LikeHTTPHandler) HandlerGetAllLikes(w http.ResponseWriter, r *http.Request) {
+func (l *LikeHTTPHandler) HandlerGetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	likes, err := l.LikeService.GetAllLikes(ctx)
+	likes, err := l.LikeService.GetAll(ctx)
 	if err != nil {
 		l.sendError(w, err.Error(), http.StatusBadRequest)
 		return

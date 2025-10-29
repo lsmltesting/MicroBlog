@@ -10,9 +10,9 @@ import (
 )
 
 type PostRepository interface {
-	Save(ctx context.Context, post *models.Post) (int, error)
-	FindPostByID(ctx context.Context, postID int) (*models.Post, error)
-	GetAllPosts(ctx context.Context) (map[int]*models.Post, error)
+	Create(ctx context.Context, post *models.Post) (int, error)
+	FindByID(ctx context.Context, postID int) (*models.Post, error)
+	GetAll(ctx context.Context) (map[int]*models.Post, error)
 }
 
 type inMemoryPostRepo struct {
@@ -27,7 +27,7 @@ func NewInMemoryPostRepo(pool *pgxpool.Pool) PostRepository {
 	}
 }
 
-func (r *inMemoryPostRepo) Save(ctx context.Context, post *models.Post) (int, error) {
+func (r *inMemoryPostRepo) Create(ctx context.Context, post *models.Post) (int, error) {
 	querySave, args, err := r.psql.
 		Insert("posts").
 		Columns("created_at", "updated_at", "text", "user_id").
@@ -47,7 +47,7 @@ func (r *inMemoryPostRepo) Save(ctx context.Context, post *models.Post) (int, er
 	return id, nil
 }
 
-func (r *inMemoryPostRepo) FindPostByID(ctx context.Context, postID int) (*models.Post, error) {
+func (r *inMemoryPostRepo) FindByID(ctx context.Context, postID int) (*models.Post, error) {
 	queryFind, args, err := r.psql.
 		Select("created_at", "updated_at", "text", "user_id", "id").
 		From("posts").
@@ -73,7 +73,7 @@ func (r *inMemoryPostRepo) FindPostByID(ctx context.Context, postID int) (*model
 	return post, nil
 }
 
-func (r *inMemoryPostRepo) GetAllPosts(ctx context.Context) (map[int]*models.Post, error) {
+func (r *inMemoryPostRepo) GetAll(ctx context.Context) (map[int]*models.Post, error) {
 	queryAll, args, err := r.psql.
 		Select("created_at", "updated_at", "text", "user_id", "id").
 		From("posts").

@@ -57,15 +57,15 @@ func (s *HTTPServer) Run() error {
 	}
 
 	// Register methods from userHttpHandler
-	router.Path("/register").Methods("POST").HandlerFunc(s.userHttpHandler.UserHandlerRegister)
+	router.Path("/register").Methods("POST").HandlerFunc(s.userHttpHandler.HandlerCreate)
 
 	// Register methods from postHttpHandler
-	router.Path("/posts").Methods("POST").HandlerFunc(s.postHttpHandler.HandlerCreatePost)
-	router.Path("/posts").Methods("GET").HandlerFunc(s.postHttpHandler.HandlerGetAllPosts)
+	router.Path("/posts").Methods("POST").HandlerFunc(s.postHttpHandler.HandlerCreate)
+	router.Path("/posts").Methods("GET").HandlerFunc(s.postHttpHandler.HandlerGetAll)
 
 	// Register method from likeHttpHandler
-	router.Path("/posts/{post_id}/like").Methods("POST").Queries("user_id", "{user_id}").HandlerFunc(s.likeHttpHandler.HandlerCreateLike)
-	router.Path("/likes").Methods("GET").HandlerFunc(s.likeHttpHandler.HandlerGetAllLikes)
+	router.Path("/posts/{post_id}/like").Methods("POST").Queries("user_id", "{user_id}").HandlerFunc(s.likeHttpHandler.HandlerCreate)
+	router.Path("/likes").Methods("GET").HandlerFunc(s.likeHttpHandler.HandlerGetAll)
 
 	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
