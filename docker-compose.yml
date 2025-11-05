@@ -1,72 +1,156 @@
 services:
-
-  backend:
-    build: .
-    container_name: microblog_app
-    ports:
-      - "8080:8080"
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-    depends_on:
-      db:
-        condition: service_healthy
-    command: ["./main"]
-
   db:
-    image: postgres:16.0
+    image: postgres:15
     container_name: microblog_db
     environment:
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_USER: ${DB_USER}
       POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  kafka:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    container_name: microblog_kafka
+    command:
+      [
+        "redpanda",
+        "start",
+        "--overprovisioned",
+        "--smp", "1",
+        "--memory", "512M",
+        "--reserve-memory", "0M",
+        "--node-id", "0",
+        "--check=false",
+        "--kafka-addr", "PLAINTEXT://0.0.0.0:9092",
+        "--advertise-kafka-addr", "PLAINTEXT://kafka:9092"
+      ]
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "9092:9092"
+
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile.api
+    container_name: microblog_api
+    env_file: ../.env
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    ports:
+      - "8080:8080"
+
+  engagement:
+    build:
+      context: ..
+    dockerfile: Dockerfile.engagement
+    container_name: microblog_engagement
+    env_file: ../.env
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    ports:
+      - "8090:8090"
 
   migrator:
-    build: .
+    build:
+      context: ..
+      dockerfile: Dockerfile.api
     container_name: microblog_migrator
-    env_file: .env 
+    env_file: ../.env
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./db/migrations:/migrations 
     command: >
-      sh -c "
-        /go/bin/goose -dir /migrations postgres "postgres://$DB_USER:$DB_PASSWORD@db:$DB_PORT/$DB_NAME?sslmode=disable" up
-      "
+      sh -c "/go/bin/goose -dir /migrations postgres
+      \"postgres://$DB_USER:$DB_PASSWORD@db:5432/$DB_NAME?sslmode=disable\" up"
     restart: "no"
-
-  dev:
-    image: golang:1.23.2-alpine
-    platform: linux/amd64
-    container_name: microblog_dev
-    working_dir: /app
-    volumes:
-      - .:/app
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - default
 
 volumes:
   postgres_data:
-      name: microblog_postgres_data
+    name: microblog_postgres_data
+
+
+
+
+# services:
+
+#   backend:
+#     build: .
+#     container_name: microblog_app
+#     ports:
+#       - "8080:8080"
+#     environment:
+#       DB_HOST: ${DB_HOST}
+#       DB_PORT: ${DB_PORT}
+#       DB_USER: ${DB_USER}
+#       DB_PASSWORD: ${DB_PASSWORD}
+#       DB_NAME: ${DB_NAME}
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#     command: ["./main"]
+
+#   db:
+#     image: postgres:16.0
+#     container_name: microblog_db
+#     environment:
+#       POSTGRES_PASSWORD: ${DB_PASSWORD}
+#       POSTGRES_USER: ${DB_USER}
+#       POSTGRES_DB: ${DB_NAME}
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+#     ports:
+#       - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+
+#   migrator:
+#     build: .
+#     container_name: microblog_migrator
+#     env_file: .env 
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#     volumes:
+#       - ./db/migrations:/migrations 
+#     command: >
+#       sh -c "
+#         /go/bin/goose -dir /migrations postgres "postgres://$DB_USER:$DB_PASSWORD@db:$DB_PORT/$DB_NAME?sslmode=disable" up
+#       "
+#     restart: "no"
+
+#   dev:
+#     image: golang:1.23.2-alpine
+#     platform: linux/amd64
+#     container_name: microblog_dev
+#     working_dir: /app
+#     volumes:
+#       - .:/app
+#     environment:
+#       DB_HOST: db
+#       DB_PORT: 5432
+#       DB_USER: ${DB_USER}
+#       DB_PASSWORD: ${DB_PASSWORD}
+#       DB_NAME: ${DB_NAME}
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#     networks:
+#       - default
+
+# volumes:
+#   postgres_data:
+#       name: microblog_postgres_data

@@ -10,7 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/lsmltesting/MicroBlog/internal/logger"
+	"github.com/lsmltesting/MicroBlog/services/api/internal/logger"
 )
 
 const defaultMaxConns = int32(4)
