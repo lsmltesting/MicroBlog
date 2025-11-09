@@ -72,10 +72,12 @@ func main() {
 			Workers:    6,
 		},
 		likeServiceDecorator,
+		producer,
+		lg,
 	)
 
-	userHttpHandler := handlers.NewUserHTTPHandler(userServiceDecorator)
-	postHttpHandler := handlers.NewPostHTTPHandler(postServiceDecorator, userServiceDecorator)
+	userHttpHandler := handlers.NewUserHTTPHandler(userServiceDecorator, producer)
+	postHttpHandler := handlers.NewPostHTTPHandler(postServiceDecorator, userServiceDecorator, producer)
 	likeHttpHandler := handlers.NewLikeHTTPHandler(likeQueue, likeServiceDecorator)
 
 	serverConfig := server.Config{

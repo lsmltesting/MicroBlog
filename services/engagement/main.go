@@ -49,7 +49,7 @@ func main() {
 	postLikedConsumer := consumer.NewPostLikedConsumer(eventsCfg, statsRepo, lg)
 	defer postLikedConsumer.Close()
 
-	// запускаем consumer
+	// start consumer
 	go func() {
 		if err := postLikedConsumer.Run(ctx); err != nil {
 			lg.AddLog(
