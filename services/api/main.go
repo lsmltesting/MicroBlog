@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/lsmltesting/MicroBlog/db"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/events"
+	"github.com/lsmltesting/MicroBlog/internal/events"
+	"github.com/lsmltesting/MicroBlog/internal/logger"
 	handlers "github.com/lsmltesting/MicroBlog/services/api/internal/handlers/http"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/logger"
 	"github.com/lsmltesting/MicroBlog/services/api/internal/queue"
 	likeRepo "github.com/lsmltesting/MicroBlog/services/api/internal/repo/like"
 	postRepo "github.com/lsmltesting/MicroBlog/services/api/internal/repo/post"

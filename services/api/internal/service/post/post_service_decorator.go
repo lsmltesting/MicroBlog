@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/lsmltesting/MicroBlog/services/api/internal/logger"
+	"github.com/lsmltesting/MicroBlog/internal/logger"
 	"github.com/lsmltesting/MicroBlog/services/api/internal/models"
 )
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5/pgxpool"
-	customErrors "github.com/lsmltesting/MicroBlog/services/api/internal/errors"
+	customErrors "github.com/lsmltesting/MicroBlog/internal/errors"
 	"github.com/lsmltesting/MicroBlog/services/api/internal/models"
 )
 

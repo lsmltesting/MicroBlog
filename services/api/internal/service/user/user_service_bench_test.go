@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/lsmltesting/MicroBlog/db"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/logger"
+	"github.com/lsmltesting/MicroBlog/internal/logger"
 	"github.com/lsmltesting/MicroBlog/services/api/internal/repo/user"
 )
 

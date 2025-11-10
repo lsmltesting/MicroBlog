@@ -12,10 +12,11 @@ const (
 )
 
 const (
-	SourceMain    Source = "MAIN"
-	SourceHandler Source = "HANDLER"
-	SourceService Source = "SERVICE"
-	SourceRepo    Source = "REPO"
-	SourceDB      Source = "DB"
-	SourceQueue   Source = "QUEUE"
+	SourceMain     Source = "MAIN"
+	SourceHandler  Source = "HANDLER"
+	SourceService  Source = "SERVICE"
+	SourceRepo     Source = "REPO"
+	SourceDB       Source = "DB"
+	SourceQueue    Source = "QUEUE"
+	SourceConsumer Source = "CONSUMER"
 )

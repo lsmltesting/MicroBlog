@@ -11,9 +11,9 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/lsmltesting/MicroBlog/db"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/events"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/logger"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/trace"
+	"github.com/lsmltesting/MicroBlog/internal/events"
+	"github.com/lsmltesting/MicroBlog/internal/logger"
+	"github.com/lsmltesting/MicroBlog/internal/trace"
 	"github.com/lsmltesting/MicroBlog/services/engagement/internal/consumer"
 	"github.com/lsmltesting/MicroBlog/services/engagement/internal/handlers"
 	"github.com/lsmltesting/MicroBlog/services/engagement/internal/repository"

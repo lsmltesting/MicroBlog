@@ -7,8 +7,8 @@ import (
 
 	"github.com/segmentio/kafka-go"
 
-	"github.com/lsmltesting/MicroBlog/services/api/internal/events"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/logger"
+	"github.com/lsmltesting/MicroBlog/internal/events"
+	"github.com/lsmltesting/MicroBlog/internal/logger"
 	"github.com/lsmltesting/MicroBlog/services/engagement/internal/repository"
 )
 

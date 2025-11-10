@@ -35,7 +35,7 @@ services:
 
   api:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile.api
     container_name: microblog_api
     env_file: .env
@@ -49,7 +49,7 @@ services:
 
   engagement:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile.engagement
     container_name: microblog_engagement
     env_file: .env
@@ -63,7 +63,7 @@ services:
 
   migrator:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile.api
     container_name: microblog_migrator
     env_file: .env
