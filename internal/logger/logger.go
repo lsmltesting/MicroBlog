@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	customErrors "github.com/lsmltesting/MicroBlog/services/api/internal/errors"
+	customErrors "github.com/lsmltesting/MicroBlog/internal/errors"
 )
 
 type LoggerConfig struct {

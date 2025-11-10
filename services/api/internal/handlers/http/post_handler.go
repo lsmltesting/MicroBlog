@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lsmltesting/MicroBlog/internal/events"
+	"github.com/lsmltesting/MicroBlog/internal/trace"
 	"github.com/lsmltesting/MicroBlog/services/api/internal/dto"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/events"
 	"github.com/lsmltesting/MicroBlog/services/api/internal/service/post"
 	"github.com/lsmltesting/MicroBlog/services/api/internal/service/user"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/trace"
 )
 
 type PostHTTPHandler struct {

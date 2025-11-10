@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"unicode"
 
-	customErrors "github.com/lsmltesting/MicroBlog/services/api/internal/errors"
+	customErrors "github.com/lsmltesting/MicroBlog/internal/errors"
 )
 
 var usernameRegex = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9]*$`)

@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	customErrors "github.com/lsmltesting/MicroBlog/services/api/internal/errors"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/events"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/logger"
+	customErrors "github.com/lsmltesting/MicroBlog/internal/errors"
+	"github.com/lsmltesting/MicroBlog/internal/events"
+	"github.com/lsmltesting/MicroBlog/internal/logger"
+	"github.com/lsmltesting/MicroBlog/internal/trace"
 	"github.com/lsmltesting/MicroBlog/services/api/internal/service/like"
-	"github.com/lsmltesting/MicroBlog/services/api/internal/trace"
 )
 
 type LikeQueue interface {

@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/lsmltesting/MicroBlog/services/api/internal/errors"
+	"github.com/lsmltesting/MicroBlog/internal/errors"
 )
 
 type Post struct {
